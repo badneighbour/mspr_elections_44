@@ -1,19 +1,16 @@
 import pandas as pd
+
 pd.options.display.width = 200
+pd.options.display.max_columns = None
+pd.options.display.max_colwidth = None
+
 
 def traitement_rsa(save=False):
+    input_path = "input/"
+    fichier = input_path + "dossier_complet.csv"
 
     # Chemin vers le fichier CSV
-    df = pd.read_csv('/Users/mickael/Documents/Cours/EPSI/MSPR/Data/Data RSA/RSA par commune.csv', sep=';', encoding='utf-8')
-
-    # Configurations d'affichage pour Pandas
-    pd.set_option('display.max_columns', None)
-    pd.set_option('display.max_rows', None)
-    pd.set_option('display.max_colwidth', None)
-    pd.set_option('display.width', None)
-
-    # Limiter à 10000 lignes
-    df = df.head(10000)
+    df_rsa = pd.read_csv(fichier, sep=';', encoding='utf-8')
 
     # Colonnes à supprimer
     colonnes_inutiles = ['location']
@@ -25,10 +22,10 @@ def traitement_rsa(save=False):
         return False
 
     # Trouver les colonnes à supprimer
-    columns_to_drop = [col for col in df.columns if filtrer(col)]
+    columns_to_drop = [col for col in df_rsa.columns if filtrer(col)]
 
     # Supprimer les colonnes inutiles
-    df_rsa = df.drop(columns=columns_to_drop)
+    df_rsa.drop(columns=columns_to_drop, inplace=True)
 
     # Convertir les colonnes en entiers si nécessaire
     columns_to_convert = ['code_commune', 'nb_benef_rsa']
@@ -39,15 +36,14 @@ def traitement_rsa(save=False):
             df_rsa[col] = df_rsa[col].fillna(0).astype(int)
 
     # Supprimer les lignes avec des valeurs manquantes après la conversion
-    df_rsa = df_rsa.dropna()
+    df_rsa.dropna(inplace=True)
 
     # Afficher le résultat final
     print(df_rsa)
 
-    # Chemin vers le fichier CSV de sortie
     output_path = "output/"
     output = output_path + "dossier_complet.csv"
 
     if save:
-        print("Sauvegarde dossier complet df_rsa traité")
+        print("Sauvegarde dossier complet df_insee traité")
         df_rsa.to_csv(output, sep=';', index=False, encoding='utf-8')
