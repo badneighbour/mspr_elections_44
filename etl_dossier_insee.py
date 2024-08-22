@@ -1,3 +1,4 @@
+from sqlalchemy import create_engine
 import pandas as pd
 pd.options.display.width = 200
 
@@ -5,9 +6,6 @@ def traitement_insee(save=False):
 
     #Expression régulière (REGEX) pour sélectionner toutes les communes de Loire Atlantique (code insee qui commence par 44)
     regex_code_insee = "^44[0-9]{3}$"
-
-    #Regex pour sélectionner les colonnes pertinentes
-
 
     input_path = "input/"
     fichier = input_path + "dossier_complet.csv"
@@ -22,8 +20,12 @@ def traitement_insee(save=False):
 
     df_insee = df_insee[df_insee["CODGEO"].str.contains(regex_code_insee, regex=True)]
 
-    df_insee = df_insee.filter(regex=r"^(P(21|15|10)_(POP(H|F|0014|1529|3044|4559|6074|7589|90P)|CHOM1564)|C(21|15|10)_POP15P_CS7|CODGEO|SNHM21)$")
+    df_insee = df_insee.filter(regex=r"^(P(21|15|10)_(POP(H|F|0014|1529|3044|4559|6074|7589|90P)?|CHOM1564)|C(21|15|10)_POP15P_CS7|CODGEO|SNHM21)$")
     df_metadata = df_metadata[(df_metadata["COD_VAR"] != "CODGEO") & (df_metadata["COD_VAR"].isin(df_insee.columns))]
+
+    #On renomme les colonnes du dossier complet par des noms explicites
+    df_metadata["LIB_VAR"] = df_metadata["LIB_VAR"].str.split('(').str[0].str.strip().str.replace(" |-", "_", regex=True)
+    df_insee.rename(columns=df_metadata.set_index("COD_VAR")["LIB_VAR"], inplace=True)
 
     print(df_insee.head())
     print(df_insee.shape)
@@ -33,7 +35,7 @@ def traitement_insee(save=False):
     i = 0
     for column in df_insee.columns:
         i+=1
-        print(column, end=" ")
+        print(column, end=", ")
         if i == 10:
             i = 0
             print()
@@ -46,3 +48,9 @@ def traitement_insee(save=False):
         print("Sauvegarde dossier complet df_insee traité")
         df_insee.to_csv(output, sep=";", index=False)
         df_metadata.to_csv(output_metadata, sep=";", index=False)
+
+def insee_to_db():
+    print("insee_to_db")
+    output_path = "output/"
+    output = output_path + "dossier_complet.csv"
+    engine = create_engine('sqlite:///data/msprdb')
