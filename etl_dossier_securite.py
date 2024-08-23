@@ -6,11 +6,11 @@ pd.options.display.max_colwidth = None
 
 def traitement_securite(save=False):
 
-    # Chemin vers le fichier CSV
-    file_path = "/Users/mickael/Documents/Cours/EPSI/MSPR/Data/Data sécurité/Base statistique communale de la délinquance enregistrée par la police et la gendarmerie nationales.csv"
+    input_path = "input/"
+    fichier = input_path + "dossier_complet.csv"
 
     # Lire le fichier CSV dans un DataFrame
-    df_securite = pd.read_csv(file_path, sep=';', encoding='utf-8', low_memory=False)
+    df_securite = pd.read_csv(fichier, sep=';', encoding='utf-8', low_memory=False)
 
     # Filtrer les lignes où la colonne Code.département est égale à 44
     df_securite_filtered = df_securite[df_securite['CODGEO_2024'].str.startswith('44')].copy()
@@ -38,8 +38,8 @@ def traitement_securite(save=False):
     # Échantillonner 20% des données filtrées
     #df_sampled = df_securite_filtered.sample(frac=0.2, random_state=42)
 
-    # Chemin vers le fichier CSV de sortie
-    output_path = "/Users/mickael/Documents/Cours/EPSI/MSPR/Data/Data sécurité/Data sécurité par commune Loire-Atlantique_traitées.csv"
+    output_path = "output/"
+    output = output_path + "dossier_complet.csv"
 
     if save:
         print("Sauvegarde dossier complet df_securite traité")
