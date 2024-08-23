@@ -308,7 +308,7 @@ for _, row in data_resultats_2022_t2.iterrows():
 for _, row in data_rsa.iterrows():
     insert_stmt = rsa_table.insert().values(
         Code_Commune=row['code_commune'],
-        Libelle=row['libelle'],
+        Libelle_Commune=row['libelle'],
         Nombre_Beneficiaires_RSA=row['nb_benef_rsa'],
         Annee=row['annee']
     )

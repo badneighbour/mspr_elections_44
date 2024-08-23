@@ -119,7 +119,7 @@ print("Encodage des noms des candidats :")
 print(resultats_2022_t1_df[['Candidat_Max_Voix_T1_2022', 'Candidat_Max_Voix_T1_2022_Encoded']].head())
 
 # Fusionner les résultats du premier tour avec le DataFrame principal
-merged_df = merged_df.merge(resultats_2022_t1_df[['Code_Commune', 'Candidat_Max_Voix_T1_2022', 'Nombre_Voix_Max_T1_2022']], on='Code_Commune', how='left')
+merged_df = merged_df.merge(resultats_2022_t1_df[['Code_Commune', 'Candidat_Max_Voix_T1_2022_Encoded', 'Nombre_Voix_Max_T1_2022']], on='Code_Commune', how='left')
 
 # Supprimer les colonnes qui sont complètement vides (toutes les valeurs sont NaN)
 merged_df = merged_df.dropna(axis=1, how='all')
