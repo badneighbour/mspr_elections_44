@@ -4,47 +4,46 @@ pd.options.display.width = 200
 pd.options.display.max_columns = None
 pd.options.display.max_colwidth = None
 
-
 def traitement_securite(save=False):
+
     input_path = "input/"
     fichier = input_path + "dossier_complet.csv"
 
     # Lire le fichier CSV dans un DataFrame
-    df_securite = pd.read_csv(fichier, sep=';', encoding='utf-8')
-
-    # Ajouter 2000 à la colonne "annee"
-    df_securite["annee"] = df_securite["annee"] + 2000
-
-    # Remplacer les valeurs "NA" de la colonne "tauxpourmille" par les valeurs de la colonne "complementinfotaux"
-    df_securite["tauxpourmille"] = df_securite["tauxpourmille"].where(df_securite["tauxpourmille"] != "NA",
-                                                                      df_securite["complementinfotaux"])
-
-    # Supprimer la colonne "complementinfotaux"
-    df_securite = df_securite.drop(columns=["complementinfotaux"])
-
-    # Remplacer les valeurs "NA" dans la colonne "faits" par les valeurs de "complementinfoval"
-    df_securite["faits"] = df_securite["faits"].where(df_securite["faits"] != "NA", df_securite["complementinfoval"])
-
-    # Supprimer la colonne "complementinfoval"
-    df_securite = df_securite.drop(columns=["complementinfoval"])
-    df_securite = df_securite.drop(columns=["valeur.publiée"])
+    df_securite = pd.read_csv(fichier, sep=';', encoding='utf-8', low_memory=False)
 
     # Filtrer les lignes où la colonne Code.département est égale à 44
-    df_securite = df_securite[
-        (df_securite["CODGEO_2024"].astype(str).str.startswith("44")) &
-        (df_securite["annee"] < 2023) &
-        ((df_securite["faits"] != 0) | (df_securite["faits"].notna()))
-        ]
+    df_securite_filtered = df_securite[df_securite['CODGEO_2024'].str.startswith('44')].copy()
+
+    # Ajouter 2000 à la colonne "annee"
+    df_securite_filtered.loc[:, "annee"] = df_securite_filtered["annee"] + 2000
+
+    df_securite_filtered['complementinfotaux'] = df_securite_filtered['complementinfotaux'].str.replace(',', '.').astype(float)
+
+    # Remplacer les valeurs "NaN" dans la colonne "tauxpourmille" par les valeurs de la colonne "complementinfotaux"
+    df_securite_filtered.loc[:, 'tauxpourmille'] = df_securite_filtered['tauxpourmille'].fillna(df_securite_filtered['complementinfotaux'])
+
+    # Supprimer la colonne "complementinfotaux"
+    df_securite_filtered.drop(columns=['complementinfotaux'], inplace=True)
+
+    # Remplacer les virgules par des points dans la colonne 'complementinfoval'
+    df_securite_filtered['complementinfoval'] = df_securite_filtered['complementinfoval'].str.replace(',', '.').astype(float)
+
+    # Remplacer les valeurs "NaN" dans la colonne "faits" par les valeurs de "complementinfoval"
+    df_securite_filtered.loc[:, 'faits'] = df_securite_filtered['faits'].fillna(df_securite_filtered['complementinfoval'])
+
+    # Supprimer la colonne "complementinfoval"
+    df_securite_filtered.drop(columns=['complementinfoval'], inplace=True)
 
     # Échantillonner 20% des données filtrées
-    df_securite.sample(frac=0.2, random_state=42)
-
-    # Afficher les résultats filtrés et échantillonnés
-    print(df_securite.head(1000))
+    #df_sampled = df_securite_filtered.sample(frac=0.2, random_state=42)
 
     output_path = "output/"
     output = output_path + "dossier_complet.csv"
 
     if save:
         print("Sauvegarde dossier complet df_securite traité")
-        df_securite.to_csv(output, sep=';', index=False, encoding='utf-8')
+        df_securite_filtered.to_csv(output_path, sep=';', index=False, encoding='utf-8')
+
+# Appel de la fonction
+traitement_securite(save=True)
